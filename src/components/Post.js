@@ -8,14 +8,23 @@ class Post extends Component{
 
 	render(){
 		return(
-			<img 
-				src={this.props.post.data.url}
-				style={{marginLeft: "auto", marginRight: "auto", display:"block", paddingBottom:"10px"}}
-				onError={this.imageMissing} 
-				alt={this.props.post.data.name} 
-				width="60%" 
-				height="auto"
-			/>
+			<div>
+				<img 
+					src={this.props.post.data.url}
+					style={{marginLeft: "auto",
+						marginRight: "auto", 
+						display:"block",
+						border:"20px solid white",
+						borderRadius:"20px"
+						}}
+
+					onError={this.imageMissing} 
+					alt={this.props.post.data.name} 
+					width="60%" 
+					height="auto"
+				/>
+				<br/>
+			</div>
 		)
 	}
 }

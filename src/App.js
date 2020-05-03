@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import Viewer from './components/Viewer';
+import Header from './components/Header';
 import axios from 'axios';
 
 class App extends Component{
@@ -27,7 +28,9 @@ class App extends Component{
   //Initial Loading of the subreddit content
   loadSubs(){
     axios.get('https://www.reddit.com/r/' + this.state.subreddit + '/.json')
-      .then(response => this.setState({imageList: response.data.data.children, after: response.data.data.after}));
+      .then(response => {this.setState({imageList: response.data.data.children, after: response.data.data.after});
+                         document.getElementById("errorMessage").innerHTML = ""})
+      .catch((error) => {document.getElementById("errorMessage").innerHTML = "Error retrieving data!"});
   }
 
   componentDidMount(){
@@ -54,11 +57,8 @@ class App extends Component{
   */
   didScroll = (e) =>{
 
-    console.log(document.getElementById("View").offsetHeight * 0.75 + "      " + document.documentElement.scrollTop);
-
     if(document.getElementById("View").offsetHeight * 0.75 <= document.documentElement.scrollTop && this.state.isAtBottom === false){
 
-      console.log("BOTROGTAG");
       this.setState({isAtBottom: true});
 
       axios.get('https://www.reddit.com/r/' + this.state.subreddit + '/.json?after=' + this.state.after)
@@ -76,9 +76,18 @@ class App extends Component{
   render(){
     return(
       <div className="App" id="View">
-        <div id="search">
+        <Header />
+        <div id="search" style={{
+        textAlign: "center", 
+        backgroundColor: "white",
+        borderBottomLeftRadius: "30px",
+        borderBottomRightRadius: "30px",
+        paddingBottom: "10px",
+        fontSize: "30px"
+        }}>
           <label>Subreddit: </label>
           <input type="text" id="subName" defaultValue="cute"/>
+          <p id="errorMessage"></p>
           <button onClick={this.changeSub}>View Images</button>
         </div>
         <Viewer posts={this.state.imageList}/>
