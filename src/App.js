@@ -23,14 +23,38 @@ class App extends Component{
     this.didScroll = this.didScroll.bind(this);
     this.changeSub = this.changeSub.bind(this);
     this.loadSubs = this.loadSubs.bind(this);
+    this.filterList = this.filterList.bind(this);
+
+    this.listLength = 0;
   }
 
   //Initial Loading of the subreddit content
   loadSubs(){
     axios.get('https://www.reddit.com/r/' + this.state.subreddit + '/.json')
-      .then(response => {this.setState({imageList: response.data.data.children, after: response.data.data.after});
-                         document.getElementById("errorMessage").innerHTML = ""})
+      .then(response => {
+                          this.setState({
+                            imageList: response.data.data.children, 
+                            after: response.data.data.after
+                          });
+                          this.listLength = response.data.data.children.length;
+                         document.getElementById("errorMessage").innerHTML = "";
+                          this.filterList();})
       .catch((error) => {document.getElementById("errorMessage").innerHTML = "Error retrieving data!"});
+  }
+
+  filterList(){
+
+    this.setState({
+      imageList: this.state.imageList.filter(function (e){
+        const regex = RegExp('([a-z\-_0-9\/\:\.]*\.(jpg|jpeg|png|gif))$', 'i');
+        return regex.test(e.data.url);
+      })
+    });
+
+    if(this.state.imageList.length === 0){
+      document.getElementById("errorMessage").innerHTML = "The specified subreddit does not contain valid images!"
+    }
+
   }
 
   componentDidMount(){
@@ -53,19 +77,27 @@ class App extends Component{
   }
 
   /*Event that checks how far the user scrolled through the page.
-    When roughly 75% of the screen height is reached, mroe content will get loaded.
+    When roughly 75% of the screen height is reached, more content will get loaded.
   */
   didScroll = (e) =>{
 
     if(document.getElementById("View").offsetHeight * 0.75 <= document.documentElement.scrollTop && this.state.isAtBottom === false){
-
+      
       this.setState({isAtBottom: true});
 
-      axios.get('https://www.reddit.com/r/' + this.state.subreddit + '/.json?after=' + this.state.after)
-      .then(response => this.setState({
-            imageList: this.state.imageList.concat(response.data.data.children),
-            after: response.data.data.after
-          }));
+      //A new list lenght of less than 24 implies that there are no more new posts after this
+      if(this.listLength > 24){
+
+        axios.get('https://www.reddit.com/r/' + this.state.subreddit + '/.json?after=' + this.state.after)
+        .then(response => {this.setState({
+              imageList: this.state.imageList.concat(response.data.data.children),
+              after: response.data.data.after,
+              listLength: this.state.imageList.length
+              });
+              this.listLength = response.data.data.children.length;
+              this.filterList();
+          });
+      }
     }
 
     if(document.getElementById("View").offsetHeight * 0.75 > document.documentElement.scrollTop && this.state.isAtBottom === true){
@@ -83,6 +115,7 @@ class App extends Component{
         borderBottomLeftRadius: "30px",
         borderBottomRightRadius: "30px",
         paddingBottom: "10px",
+        marginBottom: "20px",
         fontSize: "30px"
         }}>
           <label>Subreddit: </label>
