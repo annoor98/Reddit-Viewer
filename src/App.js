@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import Viewer from './components/Viewer';
 import Header from './components/Header';
 import axios from 'axios';
+import arrow from './assets/arrow.png';
 
 class App extends Component{
 
@@ -24,6 +25,7 @@ class App extends Component{
     this.changeSub = this.changeSub.bind(this);
     this.loadSubs = this.loadSubs.bind(this);
     this.filterList = this.filterList.bind(this);
+    this.toTheTop = this.toTheTop.bind(this);
 
     this.listLength = 0;
   }
@@ -100,10 +102,16 @@ class App extends Component{
       }
     }
 
+    //sets the state to being at the bottom of the page when you have reached 75% of the content
     if(document.getElementById("View").offsetHeight * 0.75 > document.documentElement.scrollTop && this.state.isAtBottom === true){
       this.setState({isAtBottom: false});
     }
   };
+
+  toTheTop(){
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  }
 
   render(){
     return(
@@ -124,6 +132,11 @@ class App extends Component{
           <button onClick={this.changeSub}>View Images</button>
         </div>
         <Viewer posts={this.state.imageList}/>
+        <div id="toTop" style={{position: 'fixed', bottom: '5%', left: '5%'}}>
+          <a href="#" onClick={this.toTheTop}>
+            <img src={arrow} alt="top" width="64" height="64"/>
+          </a>
+        </div>
       </div>
     )
   }
